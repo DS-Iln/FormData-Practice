@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <title>FormData Practice</title>
+</head>
+<body>
+    <section class="modal-window">
+        <div class="modal-background">
+            <div class="modal-window__body modal">
+                <span id="modalClose-button"></span>
+                <h2 class="modal-title">
+                    Test Drive
+                </h2>
+                <form id="modal-form">
+                    <label for="FIO-input" class="FIO-label">
+                        Enter first and last name
+                    </label>
+                    <input class="form-input _required" id="FIO-input" type="text" placeholder="Ivan Ivanov" name="FLN" value="" tabindex="7" autocomplete="off">
+                    <label for="tel-input" class="tel-label" title="Start with 7,8">
+                        Enter phone number
+                    </label>
+                    <input class="form-input _required" id="tel-input" type="tel" placeholder="7,8 ..." name="tel" value="" tabindex="8" autocomplete="off">
+                    <label for="email-input" class="email-label">
+                        Enter email
+                    </label>
+                    <input class="form-input _required _email" id="email-input" type="text" placeholder="admin@example.com" name="email" value="" tabindex="9" autocomplete="off">
+                    <input class="modal-button button" id="modal-submit" type="submit" value="Register" tabindex="10" />
+                    <input class="model-hdn" value="Largus" name="modelType" hidden>
+                </form>
+            </div>
+        </div>
+    </section>
+    <div class="wrapper">
+        <header class="header">
+            <div class="header-border">
+                <div class="header-border__logo-block logo-block">
+                    <a href="#" class="logo-block__logo link">
+                        Lada Automotive
+                    </a>
+                </div>
+                <nav class="header-border__nav-bar pages-navBar">
+                    <a href="ladaLargus.html" class="pages-navBar__page-link link active">
+                        Largus
+                    </a>
+                    <a href="ladaVesta.html" class="pages-navBar__page-link link">
+                        Vesta
+                    </a>
+                    <a href="ladaGranta.html" class="pages-navBar__page-link link">
+                        Granta
+                    </a>
+                </nav>
+                <div class="header-border__buttons-block buttons-block">
+                    <button class="buttons-block__button button" id="modal-testDrive">
+                        <span class="button-span">
+                            Book a test drive
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </header>
+        <main class="main">
+            <div class="content">
+                <h1 class="main-title">
+                    Largus
+                </h1>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
