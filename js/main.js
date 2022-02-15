@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
           fioInput = document.querySelector('#FIO-input'),
           telInput = document.querySelector('#tel-input'),
           emailInput = document.querySelector('#email-input'),
-          form = document.querySelector('#modal-form');
+          form = document.querySelector('#modal-form'),
+          startItem = document.querySelector('.startItem').value;
 
     let fioValue,
         fioLen,
@@ -79,8 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitBtn.classList.remove('_success');
             }, 2000);
         }
-
-        return;
     };
 
     // Validation
@@ -126,6 +125,228 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
     };
+
+    // Slider initialization
+    const slider = (function() {
+        const slider = document.querySelector('.slider'),
+              sliderContent = document.querySelector('.slider-content'),
+              sliderContentWrapper = document.querySelector('.slider-content__wrapper'),
+              sliderItems = document.querySelectorAll('.slider-item');
+        
+        let autoButton = null,
+            leftArrow = null,
+            rightArrow = null,
+            intervalId = null,
+            bullets = null,
+            pause = false;
+
+        const info = {
+            offset: 0,
+            position: {
+                current: 0,
+                min: 0,
+                max: sliderItems.length - 1
+            },
+            intervalSpeed: 0,
+
+            update: function(value) {
+                this.position.current = value;
+                this.offset = -value;
+            },
+            reset: function() {
+                this.position.current = 0;
+                this.offset = 0;
+            },
+
+            dotsEnabled: false,
+            arrowsEnabled: false,
+            autobuttonEnabled: false,
+            prevButtonDisabled: true,
+		    nextButtonDisabled: false
+        };
+
+        function init(properties) {
+            let {offset, position, intervalSpeed} = info;
+            
+            if (slider && sliderContent && sliderContentWrapper && sliderItems) {
+                if (properties && properties.intervalSpeed) {
+                    intervalSpeed = properties.intervalSpeed;
+                }
+
+                if (properties && properties.currentItem) {
+                    if (parseInt(properties.currentItem) >= position.min && parseInt(properties.currentItem) <= position.max ) {
+                        position.current = properties.currentItem;
+                        offset = - properties.currentItem;	
+                    }
+                }
+
+                if (properties && properties.bullets) {
+                    info.dotsEnabled = true;
+                }
+                if (properties && properties.arrows) {
+                    info.arrowsEnabled = true;
+                }
+                if (properties && properties.autoBtn) {
+                    info.autobuttonEnabled = true;
+                }
+                
+                updateButtonDisabling();
+                createControls(info.dotsEnabled, info.arrowsEnabled, info.autobuttonEnabled);
+                render();	
+                updateInfo(properties.currentItem - 1);
+            } else {
+                console.log('Make sure the slider layout is correct (it has the following classes: "slider", "slider-content", "slider-content__wrapper", "slider-item", "dots"))');
+            }
+        };
+
+        function createControls(dots = false, arrows = false, autobutton = false) {
+            arrows ? createArrows() : null;
+            dots ? createDots() : null;
+            autobutton ? createAutobutton() : null;
+            
+            function createArrows() {
+                leftArrow = createHTMLElement("a", "slider-switch");
+                leftArrow.href = '#';
+                leftArrow.id = 'prev-button';
+                leftArrow.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    updateInfo(info.position.current - 1)
+                });
+
+                leftSvg = createHTMLElement("img", "left-arrow");
+                leftSvg.src = '../pics/left-arrow.svg';
+                leftSvg.alt = 'icon';
+                leftArrow.append(leftSvg);
+                
+
+
+                rightArrow = createHTMLElement("a", "slider-switch");
+                rightArrow.href = '#';
+                rightArrow.id = 'next-button';
+                rightArrow.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    updateInfo(info.position.current + 1)
+                });
+
+                rightSvg = createHTMLElement("img", "right-arrow");
+                rightSvg.src = '../pics/right-arrow.svg';
+                rightSvg.alt = 'icon';
+                rightArrow.append(rightSvg);
+    
+
+
+                sliderContent.append(leftArrow, rightArrow);
+            };
+
+            function createDots() {	
+                bullets = createHTMLElement('div', 'bullets-items');
+                for(let i = 0; i < info.position.max + 1; i++) {
+                    const dot = document.createElement("div");
+                    dot.className = "bullets-items__bullet-item";
+                    dot.addEventListener("click", function() {
+                        updateInfo(i);
+                    })
+
+                    bullets.append(dot);		
+                }
+
+                sliderContent.append(bullets);
+            };
+
+            function createAutobutton() {
+                autoButton = createHTMLElement('button', 'auto-button');
+                autoButton.addEventListener("click", () => {
+                    if(pause) {
+                        slideItem();
+                        pause = false;
+                    } else {
+                        intervalId = setInterval(function(){
+                            if (info.position.current < info.position.max) {
+                                info.update(info.position.current + 1);
+                            } else {
+                                info.reset();
+                            }
+                            slideItem();
+                        }, info.intervalSpeed);
+                        pause = true;
+                    }
+                });
+
+                const span = document.createElement('span');
+                span.textContent = 'Auto';
+                autoButton.append(span);
+
+                sliderContent.append(autoButton);
+            };
+        };
+
+        function render() {
+            const {prevButtonDisabled, nextButtonDisabled} = info;
+            let controlsArray = [
+                {element: leftArrow, className: "d-none", disabled: prevButtonDisabled},
+                {element: rightArrow, className: "d-none", disabled: nextButtonDisabled}
+            ];
+
+            setClass(controlsArray);
+
+            sliderContentWrapper.style.transform = `translateX(${info.offset*100}%)`;	
+
+            if (info.dotsEnabled) {
+                if (document.querySelector(".dot--active")) {
+                    document.querySelector(".dot--active").classList.remove("dot--active");	
+                }
+
+                bullets.children[info.position.current].classList.add("dot--active");
+            }
+        };
+
+        function createHTMLElement(tagName, className) {
+            const element = document.createElement(tagName);
+            className ? element.className = className : null;
+
+            return element;
+        };
+
+        function updateInfo(value) {
+            info.update(value);
+            slideItem(true);	
+        };
+
+        function updateButtonDisabling() {
+            const {current, min, max} = info.position;
+            info.prevButtonDisabled = current > min ? false : true;
+            info.nextButtonDisabled = current < max ? false : true;
+        };
+
+        function slideItem(autoMode = false) {
+            if (autoMode && intervalId) {
+                clearInterval(intervalId);
+            }
+            
+            updateButtonDisabling();
+            render();
+        };
+
+        function setClass(options) {
+            if (options) {
+                options.forEach(({element, className, disabled}) => {
+                    if (element) {
+                        disabled ? element.classList.add(className) : element.classList.remove(className)	
+                    }
+                })
+            }
+        };
+
+        return {init};
+    }());
+
+    slider.init({
+        intervalSpeed: 1000, // IntervalSpeed for auto switching
+        currentItem: startItem, 
+        bullets: true,
+        arrows: true,
+        autoBtn : true
+    });
 })
 
 // Разобраться с последними 2 условиями валидации FIO-input (нерабочие)
