@@ -349,6 +349,144 @@ html, body
     color: #161634;
 }
 
+/* Timer styles */
+.timer-wrapper
+{
+    position: fixed;
+    top: 160px;
+    left: 20%;
+    transform: translateX(-20%);
+    display: flex;
+    flex-flow: column;
+    width: calc(400px + (300 - 400) * ((100vw - 320px) / (1920 - 320)));
+}
+
+.timer-wrapper__title-block
+{
+    background: #161634;
+    background: -webkit-linear-gradient(to top right, #29323c, #485563);
+    background: linear-gradient(to top right, #29323c, #485563);
+    border-radius: 4px 4px 0 0;
+    padding: 0.5rem;
+}
+
+.title-block
+{
+    
+}
+
+.title-block__timer-title
+{
+    text-transform: uppercase;
+    font-size: 1rem;
+    letter-spacing: 0.4px;
+    color: whitesmoke;
+}
+
+.timer-wrapper__timer-block
+{
+    background: #141E30;
+    background: -webkit-radial-gradient(#243B55, #141E30); 
+    background: radial-gradient(#243B55, #141E30);
+    border-radius: 0 0 4px 4px;
+    display: flex;
+    justify-content: center;
+    padding: 1.2rem 0;
+}
+
+.timer-block
+{
+
+}
+
+.timer-block_timer
+{
+    display: grid;
+    grid-template-areas: "daysNum sep1 hoursNum sep2 minutesNum sep3 secondsNum" 
+                         "daysWord sep1 hoursWord sep2 minutesWord sep3 secondsWord";
+    grid-template-columns: minmax(auto, 40px) minmax(auto, 32px) minmax(auto, 40px) minmax(auto, 32px) minmax(auto, 40px) minmax(auto, 32px) minmax(auto, 40px);
+    grid-template-rows: auto auto;
+    justify-items: center;
+    align-items: center;
+}
+
+#days-num
+{
+    grid-area: daysNum;
+}
+
+#hours-num
+{
+    grid-area: hoursNum;
+}
+
+#minutes-num
+{
+    grid-area: minutesNum;
+}
+
+#seconds-num
+{
+    grid-area: secondsNum;
+}
+
+#days-word
+{
+    grid-area: daysWord;
+}
+
+#hours-word
+{
+    grid-area: hoursWord;
+}
+
+#minutes-word
+{
+    grid-area: minutesWord;
+}
+
+#seconds-word
+{
+    grid-area: secondsWord;
+}
+
+#sep1
+{
+    grid-area: sep1;
+}
+
+#sep2
+{
+    grid-area: sep2;
+}
+
+#sep3
+{
+    grid-area: sep3;
+}
+
+.timer-nums, .timer-words, .timer-separator
+{
+    color: whitesmoke;
+    text-shadow: rgba(71, 71, 71, 0.65) 2px 4px 2px;
+}
+
+.timer-nums
+{
+    font-size: 1.3rem;
+}
+
+.timer-words
+{
+    font-size: 0.8rem;
+}
+
+.timer-separator
+{
+    font-weight: 700;
+    font-size: 1rem;
+}
+
 /* Slider styles */
 .slider 
 {

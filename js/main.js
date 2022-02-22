@@ -8,12 +8,113 @@ document.addEventListener('DOMContentLoaded', () => {
           telInput = document.querySelector('#tel-input'),
           emailInput = document.querySelector('#email-input'),
           form = document.querySelector('#modal-form'),
-          startItem = document.querySelector('.startItem').value;
+          startItem = document.querySelector('.startItem').value,
+          daysNum = document.querySelector('#days-num'),
+          hoursNum = document.querySelector('#hours-num'),
+          minutesNum = document.querySelector('#minutes-num'),
+          secondsNum = document.querySelector('#seconds-num'),
+          daysWord = document.querySelector('#days-word'),
+          hoursWord = document.querySelector('#hours-word'),
+          minutesWord = document.querySelector('#minutes-word'),
+          secondsWord = document.querySelector('#seconds-word'),
+          second = 1000,
+          minute = second * 60,
+          hour = minute * 60,
+          day = hour * 24;
 
     let fioValue,
         fioLen,
         telValue,
-        telLen;
+        telLen,
+        tokens,
+        timeLeft,
+        errors = 0;
+
+
+        
+    // Дата, до которой будет вестись обратный отсчет
+    let countdownDate = new Date('Feb 30, 2022 0:00:00').getTime();
+
+    const updateTimer = function() {
+        let currDate = new Date().getTime(),
+            days,
+            hours,
+            minutes,
+            seconds;
+
+        timeLeft = countdownDate - currDate;
+
+        if (timeLeft > 0) {
+            days = Math.floor(timeLeft / day);
+        
+            hours = Math.floor((timeLeft % day) / hour);
+            if (hours < 10) hours = '0' + hours;
+
+            minutes = Math.floor((timeLeft % hour) / minute);
+            if (minutes < 10) minutes = '0' + minutes;
+
+            seconds = Math.floor((timeLeft % minute) / second);
+            if (seconds < 10) seconds = '0' + seconds;
+            if (seconds == 60) seconds = 59;
+        } else {
+            days = 0;
+
+            hours = '00';
+
+            minutes = '00';
+
+            seconds = '00';
+        }
+
+        daysNum.textContent = days;
+        if ([1, 21].indexOf(days) !== -1) {
+            daysWord.textContent = 'День';
+        } else if ([2, 3, 4, 22, 23, 24].indexOf(days) !== -1) {
+            daysWord.textContent = 'Дня';
+        } else {
+            daysWord.textContent = 'Дней';
+        }
+
+        hoursNum.textContent = hours;
+        if (['01', 21].indexOf(hours) !== -1) {
+            hoursWord.textContent = 'Час';
+        } else if (['02', '03', '04', 22, 23, 24].indexOf(hours) !== -1) {
+            hoursWord.textContent = 'Часа';
+        } else {
+            hoursWord.textContent = 'Часов';
+        }
+
+        minutesNum.textContent = minutes;
+        if (['01', 21, 31, 41, 51].indexOf(minutes) !== -1) {
+            minutesWord.textContent = 'Минута';
+        } else if (['02', '03', '04', 22, 23, 24, 32, 33, 34, 42, 43, 44, 52, 53, 54].indexOf(minutes) !== -1) {
+            minutesWord.textContent = 'Минуты';
+        } else {
+            minutesWord.textContent = 'Минут';
+        }
+
+        secondsNum.textContent = seconds;
+        if (['01', 21, 31, 41, 51].indexOf(seconds) !== -1) {
+            secondsWord.textContent = 'Секунда';
+        } else if(['02', '03', '04', 22, 23, 24, 32, 33, 34, 42, 43, 44, 52, 53, 54].indexOf(seconds) !== -1) {
+            secondsWord.textContent = 'Секунды';
+        } else {
+            secondsWord.textContent = 'Секунд';
+        }
+
+        return timeLeft;
+    };
+
+    if (countdownDate && countdownDate !== 0) {
+        const updateInterval = setInterval(updateTimer, 1000);
+    }
+
+    // Как текущая дата будет равна или больше указанной для обратного отсчета, останавливаем интервал
+    if (timeLeft <= 0) {
+        clearInterval(updateInterval);
+    }  
+
+
 
     // Modal-window buttons
     openmodalBtn.addEventListener('click', () => {
@@ -28,10 +129,11 @@ document.addEventListener('DOMContentLoaded', () => {
         form.reset();
     });
 
+
+
     // Input`s change validation
     fioInput.addEventListener('input', () => {
         if (fioInput.classList.contains('_error')) fioInput.classList.remove('_error');
-
 
         fioValue = fioInput.value, fioLen = fioValue.length;
 
@@ -62,16 +164,29 @@ document.addEventListener('DOMContentLoaded', () => {
     
     async function formdataSending(e) {
         e.preventDefault();
-        let formData = new FormData(form);
 
         // Ready to send
-        if (formValidate(formData)) {
+        if (formValidate()) {
+            if (localStorage.getItem('testDrive_tokens') === null) {
+                tokens = [];
+            } else {
+                tokens = JSON.parse(localStorage.getItem('testDrive_tokens'));
+            }
+            
+            let formData = new FormData(form);
             let obj = {};
             for(let item of formData.entries()) {
+                console.log(item[1]);
                 obj[item[0]] = item[1];
             }
 
-            localStorage.setItem('testDrive_token', JSON.stringify(obj));
+            let formRequires = document.querySelectorAll('._required');
+            for(let i = 0; i < formRequires.length; i++) {
+                formRequires[i].value = '';
+            }
+
+            tokens.push(obj);
+            localStorage.setItem('testDrive_tokens', JSON.stringify(tokens));
 
             submitBtn.value = 'Registered';
             submitBtn.classList.add('_success');
@@ -83,48 +198,37 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Validation
-    function formValidate(formData) {
-        if (fioInput.value !== '' && fioValue.split(' ') == fioValue || fioInput.value !== '' && fioInput.value.slice(-1) === ' ') {
+    function formValidate() {
+        fioInput.value = fioInput.value.trim();
+        console.log('Валидировалось');
+        if (fioInput.value === '' || fioInput.value !== '' && fioInput.value.split(' ') == fioInput.value) {
             fioInput.value = '';
             fioInput.classList.add('_error');
+            errors++;
         }
         
         if (telValue === '' || telInput.value.length < 10) {
             telInput.value = '';
             telInput.classList.add('_error');
+            errors++;
         }
 
         if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,8})+$/.test(emailInput.value)) {
             emailInput.value = '';
             emailInput.classList.add('_error');
-        }
-
-        let formRequires = document.querySelectorAll('._required');
-
-        let keys = [], j = 0, errors = 0;
-        for(let key of formData.keys()) {
-            keys[j] = key;
-            j++;
-        }
-
-        for(let i = 0; i < formRequires.length; i++) {
-            if (formData.get(keys[i]) === '') {
-                formRequires[i].classList.add('_error');
-                formRequires[i].value = '';
-                errors++;
-            }
+            errors++;
         }
         
         if (errors === 0) {
-            for(let i = 0; i < formRequires.length; i++) {
-                formRequires[i].value = '';   
-            }
-
             return true;
-        } else {
+        } else if (errors > 0) {
+            errors = 0;
+
             return false;
         }
     };
+
+
 
     // Slider initialization
     const slider = (function() {
@@ -345,7 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentItem: startItem, 
         bullets: true,
         arrows: true,
-        autoBtn : true
+        autoBtn : false
     });
 })
 
