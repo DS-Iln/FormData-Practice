@@ -1,4 +1,4 @@
 # FormData Practice
  Modal-window with test drive registration form
 
-P.S. Auto switching does not work
+P.S. Slider auto switching does not work
